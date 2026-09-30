@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thigas AI - Terminal PWA</title>
+    <!-- Configurações PWA Mínimas -->
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Thigas%20AI%22,%22short_name%22:%22ThigasAI%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#000000%22,%22theme_color%22:%22#000000%22}">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #000000; color: #33ff33; font-family: 'Courier New', monospace; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding: 10px; }
+        #console { flex: 1; overflow-y: auto; font-size: 0.9rem; line-height: 1.4; padding: 5px; display: flex; flex-direction: column; gap: 12px; }
+        .ascii-art { white-space: pre; color: #33ff33; font-size: 0.75rem; text-shadow: 0 0 3px #33ff33; margin-bottom: 10px; }
+        .line { word-wrap: break-word; white-space: pre-wrap; }
+        .user-line { color: #88ff88; }
+        .ai-line { color: #ffffff; border-left: 2px solid #33ff33; padding-left: 6px; }
+        .system-line { color: #888888; font-size: 0.8rem; }
+        footer { display: flex; gap: 8px; background: #000; padding-top: 10px; border-top: 1px solid #113311; }
+        .prompt-symbol { font-weight: bold; padding-top: 10px; }
+        #command-input { flex: 1; background: #000; border: 1px solid #33ff33; color: #33ff33; font-family: 'Courier New', monospace; font-size: 1rem; padding: 10px; outline: none; border-radius: 4px; }
+        #command-input:focus { box-shadow: 0 0 8px #33ff33; }
+        #run-btn { background: #000; border: 1px solid #33ff33; color: #33ff33; font-family: 'Courier New', monospace; font-weight: bold; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+        #run-btn:hover { background: #33ff33; color: #000; }
+    </style>
+</head>
+<body>
+
+    <div id="console">
+        <div class="ascii-art">
+  [🤖] THIGAS AI TERMINAL V3_OFFLINE 
+  ___________________________________________
+  thiagollipe@poco-m6-pro:~\$ init game-engine
+  [System]: Native Offline Mode Active [12GB]
+  ___________________________________________
+        </div>
+        <div class="line system-line">Pronto para programar. Peça uma estrutura ou mecânica de jogo (ex: 'Crie o loop de uma estrutura orgânica que cresce automaticamente').</div>
+    </div>
+
+    <footer>
+        <span class="prompt-symbol">\$&nbsp;</span>
+        <input type="text" id="command-input" placeholder="thiagollipe@thigas-ai:~\$ insira uma instrução..." autocomplete="off">
+        <button id="run-btn">RUN</button>
+    </footer>
+
+    <script>
+        const consoleBox = document.getElementById('console');
+        const cmdInput = document.getElementById('command-input');
+        const runBtn = document.getElementById('run-btn');
+
+        // REGRAS DE CONTEXTO E INSTRUÇÃO PARA JOGOS
+        const SYSTEM_PROMPT = `Você é o Thigas AI, uma inteligência artificial offline especialista em engenharia de jogos 16-bit estruturados em HTML e JavaScript Canvas. Sempre forneça o código limpo, bem estruturado, corrigindo erros de lógica automaticamente e comentando as funções de movimentação baseadas em D-Pad e D-Pad + Barra de Espaço.`;
+
+        async function processCommand() {
+            const promptText = cmdInput.value.trim();
+            if (!promptText) return;
+
+            // Printa comando do usuário no terminal
+            appendLine(`thiagollipe@thigas-ai:~$ ${promptText}`, 'user-line');
+            cmdInput.value = '';
+
+            const loadingLine = appendLine('[System]: Processando tokens offline...', 'system-line');
+
+            try {
+                // ROTA LOCAL SEM DEPENDER DO COLAB: Comunicação com o Termux rodando localmente na porta 11434
+                const response = await fetch('http://127.0.0', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'thigas-ai',
+                        messages: [
+                            { role: 'system', content: SYSTEM_PROMPT },
+                            { role: 'user', content: promptText }
+                        ],
+                        stream: false
+                    })
+                });
+
+                const data = await response.json();
+                loadingLine.remove();
+
+                if (data.message && data.message.content) {
+                    appendLine(data.message.content, 'ai-line');
+                } else {
+                    appendLine('Erro: Resposta vazia recebida do mecanismo local.', 'system-line');
+                }
+            } catch (err) {
+                loadingLine.remove();
+                // FALLBACK LOCAL: Se o backend offline do Termux/llama.cpp não estiver ligado, ele avisa o desenvolvedor de forma elegante
+                appendLine(`[Erro]: Falha ao conectar ao núcleo local. Certifique-se de executar 'ollama run thigas-ai' ou seu binário do llama.cpp dentro do Termux antes de enviar comandos.`, 'system-line');
+            }
+        }
+
+        function appendLine(text, className) {
+            const div = document.createElement('div');
+            div.classList.add('line', className);
+            div.textContent = text;
+            consoleBox.appendChild(div);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+            return div;
+        }
+
+        runBtn.addEventListener('click', processCommand);
+        cmdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') processCommand(); });
+
+        // REGISTRO DO SERVICE WORKER (Para permitir instalação PWA offline)
+        if ('serviceWorker' in navigator) {
+            const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+    </script>
+</body>
+</html>
