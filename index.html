@@ -1,127 +1,114 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d10">
-  <meta name="description" content="AIthigas — interface para executar modelos de IA localmente.">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/icon.svg">
-  <title>AIthigas</title>
-  <style>
-    :root{
-      --bg:#0b0d10;--surface:#11151a;--surface-2:#171c22;--surface-3:#20262e;
-      --text:#f5f7fa;--muted:#9aa4b2;--line:#252c35;--accent:#7c9cff;
-      --accent-2:#a78bfa;--success:#45d483;--danger:#ff6b7a;
-      --shadow:0 18px 60px rgba(0,0,0,.28);--radius:18px;--sidebar:272px;
-    }
-    *{box-sizing:border-box}html,body{height:100%;margin:0}
-    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:radial-gradient(900px 600px at 50% -200px,rgba(124,156,255,.13),transparent 60%),var(--bg);
-      color:var(--text);overflow:hidden}
-    button,input,textarea,select{font:inherit}
-    button{cursor:pointer}
-    .app{height:100%;display:flex}
-    .sidebar{width:var(--sidebar);background:rgba(15,18,23,.92);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px;gap:12px}
-    .brand{display:flex;align-items:center;gap:10px;padding:9px 8px 15px}
-    .logo{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#273553,#171b28);border:1px solid #36445f;box-shadow:0 8px 25px rgba(124,156,255,.16)}
-    .logo img{width:25px;height:25px}.brand b{font-size:16px;letter-spacing:-.3px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-    .new-chat{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);padding:12px;border-radius:13px;font-weight:650}
-    .section-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f8997;padding:12px 8px 5px}
-    .nav{display:flex;flex-direction:column;gap:4px}.nav button{border:0;background:transparent;color:#d5dbe3;text-align:left;padding:10px;border-radius:10px}.nav button:hover{background:var(--surface-2)}
-    .status-card{margin-top:auto;background:linear-gradient(180deg,#141922,#10141a);border:1px solid var(--line);border-radius:15px;padding:12px}
-    .status-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#7b8491}.dot.ok{background:var(--success);box-shadow:0 0 12px rgba(69,212,131,.55)}
-    .main{flex:1;min-width:0;display:flex;flex-direction:column}
-    .topbar{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(11,13,16,.76);backdrop-filter:blur(14px)}
-    .title-wrap{display:flex;align-items:center;gap:10px;min-width:0}.model-badge{border:1px solid var(--line);padding:7px 10px;border-radius:10px;background:var(--surface);font-size:12px;color:#dce2ea;white-space:nowrap;max-width:40vw;overflow:hidden;text-overflow:ellipsis}
-    .top-actions{display:flex;gap:7px}.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:#d6dce5;display:grid;place-items:center}.icon-btn:hover{background:var(--surface-2)}
-    .chat{flex:1;overflow:auto}.chat-inner{width:min(880px,100%);margin:0 auto;padding:30px 20px 140px}
-    .hero{display:flex;gap:14px;align-items:flex-start;padding:28px 0 34px}.hero-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#1e2b48,#171a24);border:1px solid #33415f}.hero-icon img{width:32px}
-    .hero h1{margin:0;font-size:clamp(24px,4vw,36px);letter-spacing:-.8px}.hero p{margin:8px 0 0;color:var(--muted);line-height:1.55;max-width:670px}
-    .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:28px}.quick{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border-radius:15px;padding:14px;text-align:left;color:var(--text)}.quick:hover{border-color:#38465e;background:var(--surface-2)}.quick b{display:block;font-size:13px;margin-bottom:5px}.quick span{font-size:12px;color:var(--muted);line-height:1.45}
-    .message{display:flex;gap:12px;margin:22px 0}.message.user{justify-content:flex-end}.avatar{width:34px;height:34px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;flex:0 0 auto;overflow:hidden}.avatar img{width:23px}.bubble{max-width:min(760px,84%);line-height:1.65;font-size:15px}.user .bubble{background:var(--surface-3);border:1px solid #2b333d;padding:12px 15px;border-radius:17px 17px 4px 17px}.assistant .bubble{padding:3px 0}
-    .bubble pre{padding:14px;background:#090b0f;border:1px solid #1f2630;border-radius:13px;overflow:auto}.bubble code{font-family:"SFMono-Regular",Consolas,monospace;font-size:13px}.bubble p{margin:0 0 10px}.bubble p:last-child{margin-bottom:0}
-    .composer-wrap{position:absolute;left:var(--sidebar);right:0;bottom:0;padding:15px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent 0%,rgba(11,13,16,.87) 28%,rgba(11,13,16,.98) 100%)}
-    .composer{width:min(880px,100%);margin:0 auto;background:rgba(20,24,30,.96);border:1px solid #2a323d;border-radius:22px;box-shadow:var(--shadow);padding:9px}
-    .composer textarea{width:100%;min-height:48px;max-height:150px;resize:none;background:transparent;color:var(--text);border:0;outline:0;padding:8px 10px;font-size:15px;line-height:1.45}.composer textarea::placeholder{color:#7f8997}
-    .composer-bottom{display:flex;align-items:center;justify-content:space-between;padding:3px 4px 2px}.composer-tools{display:flex;gap:6px}.mini{height:32px;padding:0 10px;border:1px solid var(--line);background:var(--surface-2);color:#cbd2dc;border-radius:9px;font-size:12px}.mini:hover{background:var(--surface-3)}
-    .send{width:38px;height:38px;border:0;border-radius:12px;background:#eef2ff;color:#111827;font-weight:800}.send:disabled{opacity:.4;cursor:not-allowed}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-backdrop.open{display:flex}.modal{width:min(560px,100%);background:#11151a;border:1px solid #2a323d;border-radius:20px;box-shadow:var(--shadow);padding:20px}.modal h2{margin:0 0 4px;font-size:18px}.modal p{margin:0 0 18px;color:var(--muted);font-size:13px}
-    .field{margin:12px 0}.field label{display:block;font-size:12px;color:#9ba5b3;margin-bottom:7px}.field input,.field select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid #2a323d;background:#0c1014;color:var(--text);outline:0}.row{display:grid;grid-template-columns:1.4fr .8fr;gap:10px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.primary{border:0;border-radius:10px;padding:10px 15px;background:#e9edff;color:#111827;font-weight:750}.secondary{border:1px solid var(--line);border-radius:10px;padding:10px 15px;background:var(--surface-2);color:var(--text)}
-    .mobile-menu{display:none}
-    @media (max-width:900px){:root{--sidebar:0px}.sidebar{position:fixed;z-index:25;inset:0 auto 0 0;width:min(82vw,300px);transform:translateX(-102%);transition:.22s;border-right:1px solid var(--line);box-shadow:25px 0 70px rgba(0,0,0,.4)}.sidebar.open{transform:none}.mobile-menu{display:grid}.composer-wrap{left:0}.quick-grid{grid-template-columns:1fr}.chat-inner{padding-top:16px}.hero{padding-top:15px}.topbar{padding:0 12px}}
-    @media (max-width:560px){.model-badge{max-width:46vw}.title-wrap strong{display:none}.chat-inner{padding-left:14px;padding-right:14px}.bubble{font-size:14.5px}.composer-wrap{padding-left:10px;padding-right:10px}.composer{border-radius:18px}.hero h1{font-size:27px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<meta name="description" content="AIthigas — sua IA local, executada diretamente no navegador.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<title>AIthigas</title>
+<style>
+:root{--bg:#0b0d10;--panel:#11151b;--panel2:#171c23;--panel3:#202731;--text:#f5f7fb;--muted:#9ca7b5;--line:#252d37;--accent:#8ea7ff;--accent2:#b79cff;--ok:#4fda91;--radius:18px;--side:270px}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(850px 520px at 55% -180px,rgba(142,167,255,.14),transparent 65%),var(--bg);overflow:hidden}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.app{height:100%;display:flex}.sidebar{width:var(--side);background:rgba(15,19,24,.95);border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 16px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#293657,#171b25);border:1px solid #394868;display:grid;place-items:center}.logo img{width:27px}.brand b{font-size:16px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.newchat{width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-weight:700}.newchat:hover,.nav button:hover{background:var(--panel3)}
+.label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#788391;padding:11px 8px 4px}.nav{display:grid;gap:4px}.nav button{border:0;background:transparent;color:#d7dde5;text-align:left;padding:10px;border-radius:10px}.status{margin-top:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#141922,#101419)}.statusline{display:flex;align-items:center;gap:8px;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#6c7684}.dot.ok{background:var(--ok);box-shadow:0 0 12px rgba(79,218,145,.55)}.status small{display:block;color:var(--muted);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.main{flex:1;min-width:0;position:relative;display:flex;flex-direction:column}.top{height:64px;border-bottom:1px solid var(--line);background:rgba(11,13,16,.82);backdrop-filter:blur(15px);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:3}.top-left,.top-right{display:flex;align-items:center;gap:8px}.menu{display:none}
+.modelpill{max-width:45vw;padding:7px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:#dce3eb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:#dbe2ea}.icon:hover{background:var(--panel2)}
+.chat{flex:1;overflow:auto}.inner{width:min(900px,100%);margin:auto;padding:28px 20px 150px}.hero{display:flex;gap:14px;padding:22px 0 30px}.heroico{flex:0 0 48px;width:48px;height:48px;border-radius:15px;border:1px solid #35445e;background:linear-gradient(135deg,#213151,#151a24);display:grid;place-items:center}.heroico img{width:33px}.hero h1{margin:0;font-size:clamp(26px,4vw,38px);letter-spacing:-1px}.hero p{margin:8px 0 0;color:var(--muted);line-height:1.55;max-width:680px}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:14px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.018);color:var(--text);text-align:left}.card:hover{background:var(--panel2);border-color:#344055}.card b{display:block;font-size:13px;margin-bottom:5px}.card span{color:var(--muted);font-size:12px;line-height:1.45}
+.msg{display:flex;gap:12px;margin:20px 0}.msg.user{justify-content:flex-end}.avatar{width:34px;height:34px;flex:0 0 auto;border-radius:11px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;font-size:12px;overflow:hidden}.avatar img{width:23px}.bubble{max-width:min(770px,86%);font-size:15px;line-height:1.65}.user .bubble{padding:12px 15px;border-radius:17px 17px 4px 17px;background:var(--panel3);border:1px solid #2b3440}.assistant .bubble{padding:3px 0}.bubble pre{background:#080a0d;border:1px solid #202731;padding:13px;border-radius:12px;overflow:auto}.bubble code{font-family:"SFMono-Regular",Consolas,monospace;font-size:13px}
+.composerWrap{position:absolute;left:0;right:0;bottom:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,rgba(11,13,16,.92) 30%,rgba(11,13,16,.99));z-index:4}.composer{width:min(900px,100%);margin:auto;padding:9px;border:1px solid #2a333f;background:rgba(18,23,29,.97);border-radius:21px;box-shadow:0 18px 55px rgba(0,0,0,.28)}.composer textarea{width:100%;min-height:48px;max-height:150px;resize:none;outline:0;border:0;background:transparent;color:var(--text);padding:8px 10px;line-height:1.45;font-size:15px}.composer textarea::placeholder{color:#7f8996}.composerBottom{display:flex;justify-content:space-between;align-items:center;padding:3px}.tools{display:flex;gap:6px}.mini{height:32px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:#ccd3dd;font-size:12px}.mini:hover{background:var(--panel3)}.send{width:39px;height:39px;border:0;border-radius:12px;background:#edf1ff;color:#121826;font-weight:900}.send:disabled{opacity:.42;cursor:not-allowed}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.68);z-index:20}.modal.open{display:flex}.sheet{width:min(610px,100%);max-height:88vh;overflow:auto;padding:20px;border-radius:20px;background:#11151b;border:1px solid #2a333f;box-shadow:0 25px 80px rgba(0,0,0,.45)}.sheet h2{margin:0 0 5px;font-size:19px}.sheet>p{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.5}.field{margin:12px 0}.field label{display:block;color:#aab3bf;font-size:12px;margin-bottom:6px}.field input,.field select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid #2a333f;background:#0b0f13;color:var(--text);outline:0}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.primary,.secondary{padding:10px 15px;border-radius:10px}.primary{border:0;background:#edf1ff;color:#111827;font-weight:800}.secondary{border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+.drop{border:1px dashed #3c4758;border-radius:14px;padding:18px;text-align:center;background:#0d1116}.drop strong{display:block;font-size:13px}.drop span{display:block;color:var(--muted);font-size:12px;margin:5px 0 12px}.drop input{max-width:100%}.progress{height:7px;border-radius:999px;background:#202731;overflow:hidden;margin-top:12px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s}.meta{margin-top:12px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#0d1116;color:#cbd3dd;font-size:12px;line-height:1.55;display:none}.meta.show{display:block}.notice{padding:10px 11px;border-radius:11px;background:#171d25;border:1px solid var(--line);color:#bfc7d1;font-size:12px;line-height:1.5}
+@media(max-width:900px){.sidebar{position:fixed;z-index:15;inset:0 auto 0 0;width:min(82vw,300px);transform:translateX(-102%);transition:.22s;box-shadow:28px 0 70px rgba(0,0,0,.4)}.sidebar.open{transform:none}.menu{display:block}.cards{grid-template-columns:1fr}.inner{padding:18px 14px 145px}.composerWrap{padding-left:10px;padding-right:10px}.top{padding:0 12px}}
+@media(max-width:560px){.modelpill{max-width:49vw}.top-left strong{display:none}.hero h1{font-size:28px}.bubble{font-size:14.5px}.row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="logo"><img src="assets/icon.svg" alt=""></div><div><b>AIthigas</b><small>IA local, simples e privada</small></div></div>
-    <button class="new-chat" id="newChat">＋ Novo chat</button>
-    <div class="section-title">Workspace</div>
-    <div class="nav">
-      <button id="openModels">⌘ Modelos locais</button>
-      <button id="openSettings">⚙ Configurações</button>
-      <button id="clearChat">◌ Limpar conversa</button>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo"><img src="assets/icon.svg" alt=""></div><div><b>AIthigas</b><small>Sua IA. Seu dispositivo.</small></div></div>
+  <button class="newchat" id="newChat">＋ Novo chat</button>
+  <div class="label">Local</div>
+  <div class="nav">
+    <button id="modelBtn">▣ Carregar modelo</button>
+    <button id="settingsBtnSide">⚙ Configurações</button>
+    <button id="clearBtn">◌ Limpar conversa</button>
+  </div>
+  <div class="status"><div class="statusline"><span class="dot" id="dot"></span><span id="status">Nenhum modelo carregado</span></div><small id="statusDetail">Tudo é processado neste navegador.</small></div>
+</aside>
+
+<main class="main">
+<header class="top"><div class="top-left"><button class="icon menu" id="menuBtn">☰</button><strong>Nova conversa</strong><span class="modelpill" id="modelPill">Carregue sua LLM</span></div><div class="top-right"><button class="icon" id="settingsBtn" title="Configurações">⚙</button></div></header>
+<section class="chat" id="chat"><div class="inner" id="inner">
+  <div id="welcome">
+    <div class="hero"><div class="heroico"><img src="assets/icon.svg" alt=""></div><div><h1>Converse com a sua própria IA.</h1><p>Carregue o seu modelo diretamente no AIthigas. A inferência acontece no navegador, usando WebAssembly e, quando disponível, WebGPU — sem Ollama, sem Termux e sem servidor intermediário.</p></div></div>
+    <div class="cards">
+      <button class="card" id="loadCard"><b>Carregar minha LLM</b><span>Selecione um arquivo GGUF do aparelho ou computador.</span></button>
+      <button class="card quick" data-prompt="Explique como você funciona usando apenas o contexto que possui."><b>Testar a IA</b><span>Depois de carregar o modelo, envie uma primeira mensagem.</span></button>
+      <button class="card quick" data-prompt="Mostre um exemplo curto de código em Python."><b>Programação</b><span>Teste geração de código local.</span></button>
+      <button class="card quick" data-prompt="Dê três ideias de atividades de programação para alunos."><b>Educação</b><span>Use a sua IA em sala de aula.</span></button>
     </div>
-    <div class="status-card"><div class="status-row"><span>Motor local</span><span id="statusDot" class="dot"></span></div><div id="statusText" style="color:#c8ced7;margin-top:8px;font-size:12px">Não conectado</div></div>
-  </aside>
-  <main class="main">
-    <header class="topbar">
-      <div class="title-wrap"><button class="icon-btn mobile-menu" id="menuBtn">☰</button><strong>Nova conversa</strong><span class="model-badge" id="modelBadge">Nenhum modelo selecionado</span></div>
-      <div class="top-actions"><button class="icon-btn" id="settingsBtn" title="Configurações">⚙</button></div>
-    </header>
-    <section class="chat" id="chat">
-      <div class="chat-inner" id="chatInner">
-        <div id="welcome">
-          <div class="hero"><div class="hero-icon"><img src="assets/icon.svg" alt=""></div><div><h1>Converse com sua IA local.</h1><p>O AIthigas conecta a interface a motores que você executa no seu próprio computador ou celular, usando endpoints locais compatíveis.</p></div></div>
-          <div class="quick-grid">
-            <button class="quick" data-prompt="Explique de forma simples como funciona um modelo GGUF."><b>Entender GGUF</b><span>Veja como o formato é usado por motores locais.</span></button>
-            <button class="quick" data-prompt="Me ajude a testar se meu endpoint local está funcionando."><b>Testar conexão</b><span>Faça um diagnóstico básico da API configurada.</span></button>
-            <button class="quick" data-prompt="Crie um pequeno exemplo em Python usando uma API local compatível com chat completions."><b>Programar</b><span>Gere código para trabalhar com sua IA local.</span></button>
-            <button class="quick" data-prompt="Dê ideias para usar uma LLM localmente em aulas de programação."><b>Ideias para aulas</b><span>Exemplos práticos para uso offline.</span></button>
-          </div>
-        </div>
-      </div>
-    </section>
-    <div class="composer-wrap"><div class="composer"><textarea id="input" rows="1" placeholder="Mensagem para sua IA local..." aria-label="Mensagem"></textarea><div class="composer-bottom"><div class="composer-tools"><button class="mini" id="modelsMini">Modelo</button><button class="mini" id="attachMini">Arquivo</button></div><button class="send" id="send" disabled>↑</button></div></div></div>
-  </main>
+  </div>
+</div></section>
+<div class="composerWrap"><div class="composer"><textarea id="input" rows="1" placeholder="Escreva uma mensagem..." aria-label="Mensagem"></textarea><div class="composerBottom"><div class="tools"><button class="mini" id="loadMini">Modelo</button><button class="mini" id="infoMini">Status</button></div><button class="send" id="send" disabled>↑</button></div></div></div>
+</main>
 </div>
 
-<div class="modal-backdrop" id="modal"><div class="modal" role="dialog" aria-modal="true">
-  <h2>Configurar IA local</h2><p>O AIthigas não converte um arquivo GGUF sozinho no navegador. Ele aceita motores locais e adapta a comunicação para um formato de chat comum.</p>
-  <div class="field"><label>Endpoint base</label><input id="apiUrl" placeholder="http://127.0.0.1:11434/v1"></div>
-  <div class="row"><div class="field"><label>Modelo</label><input id="modelName" placeholder="qwen2.5-coder:latest"></div><div class="field"><label>Protocolo</label><select id="protocol"><option value="openai">OpenAI-compatible</option><option value="ollama">Ollama native</option></select></div></div>
-  <div class="field"><label>Temperatura</label><input id="temperature" type="number" min="0" max="2" step=".1" value=".7"></div>
-  <div class="modal-actions"><button class="secondary" id="cancelModal">Cancelar</button><button class="primary" id="saveModal">Salvar</button></div>
+<div class="modal" id="modal"><div class="sheet">
+  <h2>Modelo local</h2>
+  <p>O AIthigas usa um runtime WebAssembly baseado em llama.cpp apenas para executar o arquivo. O modelo e os dados continuam no seu dispositivo.</p>
+  <div class="drop"><strong>Selecione seu GGUF</strong><span>Também aceita arquivos GGUF divididos em vários shards.</span><input type="file" id="fileInput" accept=".gguf" multiple></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div class="meta" id="meta"></div>
+  <div class="field"><label>Contexto máximo</label><input id="ctx" type="number" min="512" max="32768" step="512" value="4096"></div>
+  <div class="field"><label>Temperatura</label><input id="temp" type="number" min="0" max="2" step=".1" value=".7"></div>
+  <div class="notice">Aceleração WebGPU é usada quando disponível. Caso contrário, o runtime utiliza WebAssembly no navegador. A compatibilidade e o desempenho dependem do aparelho e do modelo.</div>
+  <div class="actions"><button class="secondary" id="close">Fechar</button><button class="primary" id="load">Carregar e iniciar</button></div>
 </div></div>
 
-<script>
+<script type="module">
+import { bootRuntime, loadLocalModel, unloadModel, chatStream, supportsWebGPU } from './engine.js';
+
 const $=s=>document.querySelector(s);
-const state={messages:[],apiUrl:localStorage.getItem('aithigas_url')||'http://127.0.0.1:11434/v1',model:localStorage.getItem('aithigas_model')||'',protocol:localStorage.getItem('aithigas_protocol')||'openai',temperature:Number(localStorage.getItem('aithigas_temp')||.7)};
-const input=$('#input'),send=$('#send'),chatInner=$('#chatInner');
-function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function md(s){return esc(s).replace(/\`\`\`([\s\S]*?)\`\`\`/g,'<pre><code>$1</code></pre>').replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
-function updateBadge(){ $('#modelBadge').textContent=state.model||'Nenhum modelo selecionado'; $('#statusText').textContent=state.model?'Configurado: '+state.model:'Não conectado'; $('#statusDot').classList.toggle('ok',!!state.model); }
-function addMessage(role,text){const wrap=document.createElement('div');wrap.className='message '+role;const av=document.createElement('div');av.className='avatar';if(role==='assistant')av.innerHTML='<img src="assets/icon.svg" alt="">';else av.textContent='Você';const b=document.createElement('div');b.className='bubble';b.innerHTML=role==='assistant'?md(text):esc(text).replace(/\n/g,'<br>');wrap.append(role==='assistant'?av:b,role==='assistant'?b:av);chatInner.appendChild(wrap);$('#chat').scrollTop=$('#chat').scrollHeight;return b}
-function reset(){state.messages=[];chatInner.innerHTML='<div id="welcome">'+$('#welcomeTemplate').innerHTML+'</div>';}
-async function callApi(messages){
- const base=state.apiUrl.replace(/\/$/,''); let url=base;
- let body={model:state.model,messages,temperature:state.temperature,stream:false};
- if(state.protocol==='ollama'){url=base.endsWith('/v1')?base.slice(0,-2)+'api/chat':base+'/api/chat';body={model:state.model,messages,stream:false,options:{temperature:state.temperature}};}
- const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();
- return state.protocol==='ollama'?(d.message?.content||''): (d.choices?.[0]?.message?.content||d.response||'');
+const state={messages:[],modelLoaded:false,busy:false,temp:Number(localStorage.getItem('aithigas_temp')||.7),ctx:Number(localStorage.getItem('aithigas_ctx')||4096)};
+const input=$('#input'),send=$('#send'),inner=$('#inner'),welcome=$('#welcome');
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function md(s){return esc(s).replace(/\`\`\`([\\s\\S]*?)\`\`\`/g,'<pre><code>$1</code></pre>').replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
+function resize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,150)+'px';send.disabled=!input.value.trim()||!state.modelLoaded||state.busy;}
+function scroll(){const c=$('#chat');c.scrollTop=c.scrollHeight;}
+function add(role,text,streaming=false){const row=document.createElement('div');row.className='msg '+role;const av=document.createElement('div');av.className='avatar';const b=document.createElement('div');b.className='bubble';if(role==='assistant'){av.innerHTML='<img src="assets/icon.svg" alt="">';b.innerHTML=streaming?'':md(text);row.append(av,b)}else{av.textContent='Você';b.innerHTML=esc(text).replace(/\n/g,'<br>');row.append(b,av)}inner.appendChild(row);scroll();return b;}
+function setStatus(text,ok=false){$('#status').textContent=text;$('#dot').classList.toggle('ok',ok);$('#statusDetail').textContent=ok?'Inferência local ativa neste navegador.':'Tudo é processado neste navegador.';}
+function openModal(){ $('#modal').classList.add('open'); }
+function closeModal(){ $('#modal').classList.remove('open'); }
+async function ensureRuntime(){setStatus('Preparando runtime…');await bootRuntime();setStatus('Runtime pronto');}
+async function startModel(){
+ const files=[...$('#fileInput').files]; if(!files.length){alert('Selecione pelo menos um arquivo GGUF.');return;}
+ $('#load').disabled=true;$('#bar').style.width='5%';setStatus('Carregando modelo…');
+ try{
+   await ensureRuntime();
+   const result=await loadLocalModel(files,{n_ctx:Number($('#ctx').value)||4096,onProgress:p=>$('#bar').style.width=Math.max(5,Math.min(100,p))});
+   state.modelLoaded=true;state.ctx=Number($('#ctx').value)||4096;state.temp=Number($('#temp').value)||.7;localStorage.setItem('aithigas_ctx',state.ctx);localStorage.setItem('aithigas_temp',state.temp);
+   $('#bar').style.width='100%';$('#modelPill').textContent=result.name;$('#meta').className='meta show';$('#meta').innerHTML='<b>Modelo:</b> '+esc(result.name)+'<br><b>Arquitetura:</b> '+esc(result.arch||'não informado')+'<br><b>Quantização:</b> '+esc(result.quant||'não informada')+'<br><b>Runtime:</b> '+(supportsWebGPU()?'WebGPU + WASM':'WASM');setStatus('Modelo carregado',true);resize();closeModal();
+ }catch(e){setStatus('Falha ao carregar');$('#bar').style.width='0';alert('Não foi possível carregar o modelo: '+(e?.message||e));}
+ finally{$('#load').disabled=false;}
 }
-async function sendMsg(){const text=input.value.trim();if(!text)return;if(!state.model){openModal();return}input.value='';resize();$('#welcome')?.remove();state.messages.push({role:'user',content:text});addMessage('user',text);const b=addMessage('assistant','Conectando ao motor local…');send.disabled=true;try{const out=await callApi(state.messages);state.messages.push({role:'assistant',content:out});b.innerHTML=md(out||'O modelo não retornou conteúdo.')}catch(e){b.innerHTML='<strong>Não foi possível conectar.</strong><br><span style="color:#9aa4b2">Verifique o endpoint, o modelo e o CORS do servidor local.<br>'+esc(e.message)+'</span>'}finally{send.disabled=false;}}
-function resize(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,150)+'px';send.disabled=!input.value.trim();}
-function openModal(){$('#apiUrl').value=state.apiUrl;$('#modelName').value=state.model;$('#protocol').value=state.protocol;$('#temperature').value=state.temperature;$('#modal').classList.add('open');setTimeout(()=>$('#modelName').focus(),30)}
-function closeModal(){$('#modal').classList.remove('open')}
-function save(){state.apiUrl=$('#apiUrl').value.trim();state.model=$('#modelName').value.trim();state.protocol=$('#protocol').value;state.temperature=Number($('#temperature').value)||.7;localStorage.setItem('aithigas_url',state.apiUrl);localStorage.setItem('aithigas_model',state.model);localStorage.setItem('aithigas_protocol',state.protocol);localStorage.setItem('aithigas_temp',state.temperature);updateBadge();closeModal()}
+async function sendMsg(){const text=input.value.trim();if(!text||!state.modelLoaded||state.busy)return;input.value='';resize();welcome?.remove();state.busy=true;state.messages.push({role:'user',content:text});add('user',text);const bubble=add('assistant','',true);send.disabled=true;let out='';
+ try{await chatStream(state.messages,{temperature:state.temp,max_tokens:1024,onToken:t=>{out+=t;bubble.innerHTML=md(out);scroll();}});state.messages.push({role:'assistant',content:out});}
+ catch(e){bubble.innerHTML='<strong>Erro na inferência local.</strong><br><span style="color:#9ca7b5">'+esc(e?.message||e)+'</span>';state.messages.pop();}
+ finally{state.busy=false;resize();}}
 input.addEventListener('input',resize);input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});send.onclick=sendMsg;
-$('#settingsBtn').onclick=openModal;$('#openSettings').onclick=openModal;$('#saveModal').onclick=save;$('#cancelModal').onclick=closeModal;$('#modal').onclick=e=>{if(e.target===e.currentTarget)closeModal()};$('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open');$('#modelsMini').onclick=openModal;$('#openModels').onclick=openModal;$('#newChat').onclick=()=>location.reload();$('#clearChat').onclick=()=>{state.messages=[];document.querySelectorAll('.message').forEach(x=>x.remove())};$('#attachMini').onclick=()=>alert('Suporte a arquivos locais será conectado à camada de contexto do modelo.');
+$('#loadCard').onclick=openModal;$('#loadMini').onclick=openModal;$('#modelBtn').onclick=openModal;$('#settingsBtn').onclick=openModal;$('#settingsBtnSide').onclick=openModal;$('#close').onclick=closeModal;$('#modal').onclick=e=>{if(e.target===e.currentTarget)closeModal()};$('#load').onclick=startModel;
+$('#newChat').onclick=()=>location.reload();$('#clearBtn').onclick=()=>{state.messages=[];document.querySelectorAll('.msg').forEach(x=>x.remove());inner.insertAdjacentHTML('afterbegin','');};$('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open');
+$('#infoMini').onclick=()=>alert(state.modelLoaded?'Modelo carregado e inferência local ativa.':'Nenhum modelo carregado.');
 document.querySelectorAll('.quick').forEach(b=>b.onclick=()=>{input.value=b.dataset.prompt;resize();input.focus()});
-updateBadge();
+</script>
+<script>
+if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').catch(console.warn);}
 </script>
 </body>
 </html>
