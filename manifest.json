@@ -1,0 +1,10 @@
+{
+  "name":"AIthigas — IA local",
+  "short_name":"AIthigas",
+  "start_url":".",
+  "display":"standalone",
+  "background_color":"#0b0d10",
+  "theme_color":"#0b0d10",
+  "description":"Interface PWA para motores de IA locais.",
+  "icons":[{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
